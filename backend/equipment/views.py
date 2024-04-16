@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+
 from .models import Equipment, Supplier, PurchaseLog, Discount, TransactionLog, Sale, OnlineSale, OfflineSalesLog
 from .serializers import (
     EquipmentSerializer, SupplierSerializer, PurchaseLogSerializer,
@@ -10,7 +11,7 @@ from .serializers import (
 class EquipmentViewSet(viewsets.ModelViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
-
+    
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()

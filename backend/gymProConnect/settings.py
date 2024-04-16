@@ -14,12 +14,7 @@ SECRET_KEY = 'django-insecure-6uw)!*$!=zhzcx9fbz)zq(ofmp=&e(5&!exb%lpetx@wz34hxo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '.localhost', 
-    '127.0.0.1', 
-    '[::1]'
-]
-
+ALLOWED_HOSTS = ['*']
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -29,8 +24,6 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
-    "debug_toolbar",
-    
     "accounts.apps.AccountsConfig",
     'equipment',
     
@@ -43,16 +36,11 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
     
     'corsheaders',
 ]
 
 MIDDLEWARE = [
-    "kolo.middleware.KoloMiddleware",
-    
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     
     'corsheaders.middleware.CorsMiddleware',
     
@@ -64,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
+    "kolo.middleware.KoloMiddleware",
 ]
 
 ROOT_URLCONF = 'gymProConnect.urls'
@@ -150,14 +139,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    # ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
