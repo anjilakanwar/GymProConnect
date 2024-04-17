@@ -30,6 +30,8 @@ export function Equipments() {
 	const [showOrderForm, setShowOrderForm] = useState(null);
 	const [hasSuppliers, setHasSuppliers] = useState(null);
 
+	const [formData, setFormData] = useState({ name: "" });
+
 	useEffect(() => {
 		document.title = "Equipments";
 
@@ -43,7 +45,7 @@ export function Equipments() {
 
 		const fetchSuppliers = async () => {
 			await axiosInstance(userData.token)
-				.get("suppliers/")
+				.get("supplier/")
 				.then((res) => {
 					setSuppliersData(res.data.results);
 					setHasSuppliers(true);
@@ -53,6 +55,17 @@ export function Equipments() {
 		fetchEquipmentData();
 		fetchSuppliers();
 	}, [userData]);
+
+	const onFormDataChange = (event) => {
+		setFormData({
+			...formData,
+			[event.target.id]: event.target.value,
+		});
+	};
+
+	const handleSubmit = () => {
+		console.log(formData);
+	};
 
 	return (
 		<>
@@ -83,33 +96,41 @@ export function Equipments() {
 						<TextField
 							autoFocus
 							margin="dense"
-							id="flat"
+							id="equipmentName"
 							label="Equipment Name"
 							type="text"
 							size="small"
+							onChange={onFormDataChange}
 						/>
 						<TextField
 							autoFocus
 							margin="dense"
-							id="floor"
-							label="Floor"
+							id="count"
+							label="Count"
 							type="text"
 							size="small"
+							onChange={onFormDataChange}
 						/>
 
 						<Select
-							autoFocus
-							id="floor"
-							label="Supplier"
-							type="select"
+							name="supplier"
+							label="Suppliers"
 							size="small"
+							value={formData.name}
+							margin="dense"
 							fullWidth
+							onChange={onFormDataChange}
 							disabled={hasSuppliers ? false : true}
 						>
 							{suppliersData &&
-								suppliersData.map((row) => {
-									<MenuItem>{row.name}</MenuItem>;
-								})}
+								suppliersData.map((row) => (
+									<MenuItem
+										key={row.supplier_code}
+										value={row.supplier_code}
+									>
+										{row.name}
+									</MenuItem>
+								))}
 						</Select>
 
 						<DialogActions>
@@ -119,10 +140,7 @@ export function Equipments() {
 							>
 								Cancel
 							</Button>
-							<Button
-								onClick={() => setShowOrderForm(false)}
-								color="primary"
-							>
+							<Button onClick={handleSubmit} color="primary">
 								Submit
 							</Button>
 						</DialogActions>
@@ -135,7 +153,7 @@ export function Equipments() {
 						<TableRow>
 							<TableCell>Name</TableCell>
 							<TableCell align="right">Equipment Type</TableCell>
-							<TableCell align="right">Manufacturer</TableCell>
+							<TableCell align="right">Manufracturer</TableCell>
 							<TableCell align="right">Count</TableCell>
 						</TableRow>
 					</TableHead>
@@ -157,7 +175,7 @@ export function Equipments() {
 										{row.equipment_type}
 									</TableCell>
 									<TableCell align="right">
-										{row.manufacturer}
+										{row.manufracturer}
 									</TableCell>
 									<TableCell align="right">
 										{row.count}

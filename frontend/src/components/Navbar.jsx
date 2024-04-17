@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -6,6 +6,8 @@ import axios from "axios";
 
 import { useAuth } from "../context/AuthUser";
 import { Avatar } from "@mui/material";
+import { ArrowLeft, ArrowRight } from "@mui/icons-material";
+import { MainLayoutContext } from "../context/MainLayout";
 
 const navigation = [
 	{ name: "Dashboard", href: "#", current: true },
@@ -21,6 +23,8 @@ function classNames(...classes) {
 export const NavBar = () => {
 	const navigate = useNavigate();
 	const { userData, logout } = useAuth();
+
+	const { expanded, setExpanded } = useContext(MainLayoutContext);
 
 	const handleLogout = async () => {
 		const instance = axios.create({
@@ -46,7 +50,7 @@ export const NavBar = () => {
 	};
 
 	return (
-		<Disclosure as="nav" className="bg-white border-b-2">
+		<Disclosure as="nav" className="shadow-md border-b-2">
 			{({ open }) => (
 				<>
 					<div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -70,6 +74,22 @@ export const NavBar = () => {
 										/>
 									)}
 								</Disclosure.Button>
+							</div>
+							<div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+								<div className="flex flex-shrink-0 items-center">
+									<button
+										onClick={() =>
+											setExpanded((curr) => !curr)
+										}
+										className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 "
+									>
+										{expanded ? (
+											<ArrowLeft />
+										) : (
+											<ArrowRight />
+										)}
+									</button>
+								</div>
 							</div>
 							<div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
 								<button

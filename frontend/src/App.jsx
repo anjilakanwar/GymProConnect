@@ -8,8 +8,12 @@ import { Error } from "./pages/ErrorPage";
 import { Equipments } from "./pages/adminPages/Equipment";
 import { PurchaseLog } from "./pages/adminPages/PurchaseLog";
 import { Users } from "./pages/adminPages/Users";
+import { useEffect } from "react";
 
 export const App = () => {
+	useEffect(() => {
+		
+	})
 	return (
 		<>
 			<Routes>
