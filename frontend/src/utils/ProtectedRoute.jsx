@@ -4,7 +4,13 @@ import { useAuth } from "../context/AuthUser";
 import { NavBar } from "../components/Navbar";
 import { Login } from "../pages/LoginPage";
 import Sidebar, { SidebarItem } from "../components/Sidebar";
-import { Dashboard, FitnessCenter, People, Receipt } from "@mui/icons-material";
+import {
+	Dashboard,
+	FitnessCenter,
+	People,
+	Receipt,
+	Warehouse,
+} from "@mui/icons-material";
 import { MainLayoutProvider } from "../context/MainLayout";
 
 export const ProtectedRoute = () => {
@@ -35,6 +41,11 @@ export const ProtectedRoute = () => {
 								icon={<People />}
 								text={"Manage User"}
 								url={"/users"}
+							/>
+							<SidebarItem
+								icon={<Warehouse />}
+								text={"Supplier List"}
+								url={"/supplier"}
 							/>
 						</Sidebar>
 						<div className="w-full">

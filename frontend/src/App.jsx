@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import { Login } from "./pages/LoginPage";
@@ -8,12 +9,10 @@ import { Error } from "./pages/ErrorPage";
 import { Equipments } from "./pages/adminPages/Equipment";
 import { PurchaseLog } from "./pages/adminPages/PurchaseLog";
 import { Users } from "./pages/adminPages/Users";
-import { useEffect } from "react";
+import { Supplier } from "./pages/adminPages/Supplier";
 
 export const App = () => {
-	useEffect(() => {
-		
-	})
+	useEffect(() => {});
 	return (
 		<>
 			<Routes>
@@ -23,6 +22,7 @@ export const App = () => {
 					<Route path="landing" element={<Landing />} />
 					<Route path="dashboard" element={<Dashboard />} />
 					<Route path="equipment" element={<Equipments />} />
+					<Route path="supplier" element={<Supplier />} />
 					<Route path="transactions" element={<PurchaseLog />} />
 					<Route path="users" element={<Users />} />
 				</Route>

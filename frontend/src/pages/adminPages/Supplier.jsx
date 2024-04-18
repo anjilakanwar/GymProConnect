@@ -6,7 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Close, ShoppingCart } from "@mui/icons-material";
+import { Add, Close, ShoppingCart } from "@mui/icons-material";
 
 import { useAuth } from "../../context/AuthUser";
 import axiosInstance from "../../utils/axiosInstance";
@@ -23,48 +23,31 @@ import {
 	InputAdornment,
 	FormControl,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
-export function Equipments() {
-	const navigate = useNavigate();
+export function Supplier() {
 	const { userData } = useAuth();
-	const [equipmentData, setEquipmentData] = useState(null);
 	const [suppliersData, setSuppliersData] = useState(null);
 
-	const [showOrderForm, setShowOrderForm] = useState(null);
-	const [hasSuppliers, setHasSuppliers] = useState(null);
+	const [showForm, setShowForm] = useState(null);
 
 	const [formData, setFormData] = useState({
+		supplier_code: "",
 		name: "",
-		weight_class: "",
-		manufracturer: "",
-		count: "",
-		supplier: "",
+		contact_info: "",
+		address: "",
 	});
 
 	useEffect(() => {
-		document.title = "Equipments";
-
-		const fetchEquipmentData = async () => {
-			await axiosInstance(userData.token)
-				.get("equipment/")
-				.then((res) => {
-					setEquipmentData(res.data.results);
-				});
-		};
+		document.title = "Suppliers";
 
 		const fetchSuppliers = async () => {
 			await axiosInstance(userData.token)
 				.get("supplier/")
 				.then((res) => {
 					setSuppliersData(res.data.results);
-					if (res.data.count > 0) {
-						setHasSuppliers(true);
-					}
 				});
 		};
 
-		fetchEquipmentData();
 		fetchSuppliers();
 	}, [userData]);
 
@@ -79,8 +62,8 @@ export function Equipments() {
 		e.preventDefault();
 
 		await axiosInstance(userData.token)
-			.post("equipment/", formData)
-			.then((res) => {
+			.post("supplier/", formData)
+			.then(() => {
 				window.location.reload(false);
 			})
 			.catch((err) => {
@@ -90,12 +73,12 @@ export function Equipments() {
 
 	return (
 		<>
-			{showOrderForm && (
-				<Dialog open={showOrderForm}>
-					<DialogTitle>Order Equipment</DialogTitle>
+			{showForm && (
+				<Dialog open={showForm}>
+					<DialogTitle>Add Supplier</DialogTitle>
 					<IconButton
 						aria-label="close"
-						onClick={() => setShowOrderForm(false)}
+						onClick={() => setShowForm(false)}
 						sx={{
 							position: "absolute",
 							right: 8,
@@ -119,7 +102,7 @@ export function Equipments() {
 								autoFocus
 								margin="dense"
 								id="name"
-								label="Equipment Name"
+								label="Supplier Name"
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
@@ -128,8 +111,8 @@ export function Equipments() {
 							<TextField
 								autoFocus
 								margin="dense"
-								id="manufracturer"
-								label="Manufracturer Name"
+								id="supplier_code"
+								label="Unique Supplier Code"
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
@@ -138,74 +121,34 @@ export function Equipments() {
 							<TextField
 								autoFocus
 								margin="dense"
-								id="weight_class"
-								label="Weight Class"
+								id="contact_info"
+								label="Phone Number"
 								type="number"
 								size="small"
 								onChange={onFormDataChange}
-								InputProps={{
-									startAdornment: (
-										<InputAdornment position="start">
-											kg
-										</InputAdornment>
-									),
-								}}
 								fullWidth
 							/>
 
 							<TextField
 								autoFocus
 								margin="dense"
-								id="count"
-								label="Count"
-								type="number"
+								id="address"
+								label="Address"
+								type="text"
 								size="small"
 								onChange={onFormDataChange}
 								fullWidth
 							/>
-							<Select
-								labelId="form-suppliers"
-								size="small"
-								margin="dense"
-								value={
-									hasSuppliers
-										? formData.supplier
-										: "No Suppliers Available"
-								}
-								disabled={hasSuppliers ? false : true}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										supplier: e.target.value,
-									})
-								}
-								className="mt-2"
-								fullWidth
-							>
-								{suppliersData &&
-									suppliersData.map((row) => (
-										<MenuItem
-											key={row.supplier_code}
-											value={row.supplier_code}
-										>
-											{row.name}
-										</MenuItem>
-									))}
-							</Select>
 
 							<DialogActions>
 								<Button
-									onClick={() => setShowOrderForm(false)}
+									onClick={() => setShowForm(false)}
 									color="secondary"
 								>
 									Cancel
 								</Button>
 
-								<Button
-									onClick={handleSubmit}
-									color="primary"
-									disabled={hasSuppliers ? false : true}
-								>
+								<Button onClick={handleSubmit} color="primary">
 									Submit
 								</Button>
 							</DialogActions>
@@ -217,17 +160,17 @@ export function Equipments() {
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
 					<TableHead>
 						<TableRow>
-							<TableCell>Name</TableCell>
-							<TableCell align="right">Weight Class</TableCell>
-							<TableCell align="right">Manufracturer</TableCell>
-							<TableCell align="right">Count</TableCell>
+							<TableCell>Supplier Name</TableCell>
+							<TableCell align="right">Supplier Code</TableCell>
+							<TableCell align="right">Contact Info</TableCell>
+							<TableCell align="right">Address</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{equipmentData &&
-							equipmentData.map((row) => (
+						{suppliersData &&
+							suppliersData.map((row) => (
 								<TableRow
-									key={row.equipment_id}
+									key={row.supplier_id}
 									sx={{
 										"&:last-child td, &:last-child th": {
 											border: 0,
@@ -238,13 +181,13 @@ export function Equipments() {
 										{row.name}
 									</TableCell>
 									<TableCell align="right">
-										{row.weight_class}
+										{row.supplier_code}
 									</TableCell>
 									<TableCell align="right">
-										{row.manufracturer}
+										{row.contact_info}
 									</TableCell>
 									<TableCell align="right">
-										{row.count}
+										{row.address}
 									</TableCell>
 								</TableRow>
 							))}
@@ -254,10 +197,10 @@ export function Equipments() {
 			<Button
 				variant="outlined"
 				size="small"
-				startIcon={<ShoppingCart />}
-				onClick={() => setShowOrderForm(true)}
+				startIcon={<Add />}
+				onClick={() => setShowForm(true)}
 			>
-				Order Equipment
+				Add Supplier
 			</Button>
 		</>
 	);
