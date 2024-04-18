@@ -20,6 +20,8 @@ import {
 	MenuItem,
 	Select,
 	TextField,
+	InputAdornment,
+	FormControl,
 } from "@mui/material";
 
 export function Equipments() {
@@ -30,7 +32,7 @@ export function Equipments() {
 	const [showOrderForm, setShowOrderForm] = useState(null);
 	const [hasSuppliers, setHasSuppliers] = useState(null);
 
-	const [formData, setFormData] = useState({ name: "" });
+	const [formData, setFormData] = useState(null);
 
 	useEffect(() => {
 		document.title = "Equipments";
@@ -48,7 +50,9 @@ export function Equipments() {
 				.get("supplier/")
 				.then((res) => {
 					setSuppliersData(res.data.results);
-					setHasSuppliers(true);
+					if (res.data.count > 0) {
+						setHasSuppliers(true);
+					}
 				});
 		};
 
@@ -93,57 +97,93 @@ export function Equipments() {
 							columnGap: 10,
 						}}
 					>
-						<TextField
-							autoFocus
-							margin="dense"
-							id="equipmentName"
-							label="Equipment Name"
-							type="text"
-							size="small"
-							onChange={onFormDataChange}
-						/>
-						<TextField
-							autoFocus
-							margin="dense"
-							id="count"
-							label="Count"
-							type="text"
-							size="small"
-							onChange={onFormDataChange}
-						/>
+						<FormControl fullWidth>
+							<TextField
+								autoFocus
+								margin="dense"
+								id="equipmentName"
+								label="Equipment Name"
+								type="text"
+								size="small"
+								onChange={onFormDataChange}
+								fullWidth
+							/>
+							<TextField
+								autoFocus
+								margin="dense"
+								id="manufracturerName"
+								label="Manufracturer Name"
+								type="text"
+								size="small"
+								onChange={onFormDataChange}
+								fullWidth
+							/>
+							<TextField
+								autoFocus
+								margin="dense"
+								id="weightClass"
+								label="Weight Class"
+								type="number"
+								size="small"
+								onChange={onFormDataChange}
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position="start">
+											kg
+										</InputAdornment>
+									),
+								}}
+								fullWidth
+							/>
 
-						<Select
-							name="supplier"
-							label="Suppliers"
-							size="small"
-							value={formData.name}
-							margin="dense"
-							fullWidth
-							onChange={onFormDataChange}
-							disabled={hasSuppliers ? false : true}
-						>
-							{suppliersData &&
-								suppliersData.map((row) => (
-									<MenuItem
-										key={row.supplier_code}
-										value={row.supplier_code}
-									>
-										{row.name}
-									</MenuItem>
-								))}
-						</Select>
-
-						<DialogActions>
-							<Button
-								onClick={() => setShowOrderForm(false)}
-								color="secondary"
+							<TextField
+								autoFocus
+								margin="dense"
+								id="count"
+								label="Count"
+								type="number"
+								size="small"
+								onChange={onFormDataChange}
+								fullWidth
+							/>
+							<Select
+								labelId="form-suppliers"
+								size="small"
+								value={formData.supplier}
+								margin="dense"
+								fullWidth
+								disabled={hasSuppliers ? false : true}
+								className="mt-2"
+								onChange={this}
 							>
-								Cancel
-							</Button>
-							<Button onClick={handleSubmit} color="primary">
-								Submit
-							</Button>
-						</DialogActions>
+								{suppliersData &&
+									suppliersData.map((row) => (
+										<MenuItem
+											key={row.supplier_code}
+											value={row.supplier_code}
+										>
+											{row.name}
+										</MenuItem>
+									))}
+							</Select>
+
+							<DialogActions>
+								<Button
+									onClick={() => setShowOrderForm(false)}
+									color="secondary"
+								>
+									Cancel
+								</Button>
+
+								<Button
+									onClick={handleSubmit}
+									color="primary"
+									disabled={hasSuppliers ? false : true}
+								>
+									Submit
+								</Button>
+							</DialogActions>
+						</FormControl>
 					</DialogContent>
 				</Dialog>
 			)}
@@ -152,7 +192,7 @@ export function Equipments() {
 					<TableHead>
 						<TableRow>
 							<TableCell>Name</TableCell>
-							<TableCell align="right">Equipment Type</TableCell>
+							<TableCell align="right">Weight Class</TableCell>
 							<TableCell align="right">Manufracturer</TableCell>
 							<TableCell align="right">Count</TableCell>
 						</TableRow>
@@ -172,7 +212,7 @@ export function Equipments() {
 										{row.name}
 									</TableCell>
 									<TableCell align="right">
-										{row.equipment_type}
+										{row.weight_class}
 									</TableCell>
 									<TableCell align="right">
 										{row.manufracturer}

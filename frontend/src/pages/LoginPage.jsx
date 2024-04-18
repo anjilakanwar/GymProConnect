@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
 
-import { useAuth } from "../context/AuthUser";
+import {
+	Alert,
+	Divider,
+	Snackbar,
+	TextField,
+	InputAdornment,
+	IconButton,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
+import { useAuth } from "../context/AuthUser";
 import "../assets/css/index.css";
-import { Divider } from "@mui/material";
 
 export function Login() {
 	let { userData, login } = useAuth();
@@ -13,6 +21,9 @@ export function Login() {
 		username: "",
 		password: "",
 	});
+
+	const [openErrorToast, setErrorToast] = useState(null);
+	const [showPassword, setShowPassword] = useState(false);
 
 	const handleChange = (e) => {
 		setFormData({
@@ -29,7 +40,12 @@ export function Login() {
 				username: formData.username,
 				password: formData.password,
 			})
-			.then((res) => login(res.data));
+			.then((res) => {
+				login(res.data);
+			})
+			.catch(() => {
+				setErrorToast(true);
+			});
 	};
 
 	useEffect(() => {
@@ -45,6 +61,25 @@ export function Login() {
 					className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
 					onSubmit={handleSubmit}
 				>
+					<Snackbar
+						open={openErrorToast}
+						autoHideDuration={6000}
+						onClose={() => setErrorToast(false)}
+						anchorOrigin={{
+							horizontal: "center",
+							vertical: "top",
+						}}
+					>
+						<Alert
+							onClose={() => setErrorToast(false)}
+							severity="error"
+							variant="filled"
+							sx={{ width: "100%" }}
+						>
+							Failed to Login!!!
+						</Alert>
+					</Snackbar>
+
 					<div className="text-center mb-4">Welcome Back!</div>
 					<Divider orientation="horizontal" />
 
@@ -71,13 +106,31 @@ export function Login() {
 						>
 							Password
 						</label>
-						<input
-							className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+						<TextField
 							id="password"
-							type="password"
-							placeholder="******************"
 							name="password"
+							size="small"
+							type={showPassword ? "text" : "password"}
 							onChange={handleChange}
+							fullWidth
+							InputProps={{
+								endAdornment: (
+									<InputAdornment position="end">
+										<IconButton
+											onClick={() =>
+												setShowPassword(!showPassword)
+											}
+											edge="end"
+										>
+											{showPassword ? (
+												<Visibility />
+											) : (
+												<VisibilityOff />
+											)}
+										</IconButton>
+									</InputAdornment>
+								),
+							}}
 						/>
 					</div>
 					<Divider orientation="horizontal" />

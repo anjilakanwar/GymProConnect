@@ -2,29 +2,9 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 class Equipment(models.Model):
-    CARDIO = 'Cardio'
-    STRENGTH_TRAINING = 'Strength Training'
-    FUNCTIONAL_TRAINING = 'Functional Training'
-    FLEXIBILITY_MOBILITY = 'Flexibility & Mobility'
-    FREE_WEIGHTS = 'Free Weights'
-    MACHINES = 'Machines'
-    ACCESSORIES = 'Accessories'
-    UNCLASSIFIED = 'Unclassified'
-
-    EQUIPMENT_CHOICES = [
-        (CARDIO, 'Cardio'),
-        (STRENGTH_TRAINING, 'Strength Training'),
-        (FUNCTIONAL_TRAINING, 'Functional Training'),
-        (FLEXIBILITY_MOBILITY, 'Flexibility & Mobility'),
-        (FREE_WEIGHTS, 'Free Weights'),
-        (MACHINES, 'Machines'),
-        (ACCESSORIES, 'Accessories'),
-        (UNCLASSIFIED, 'Unclassified'),
-    ]
-    
     equipment_id = models.AutoField(primary_key=True)
     name = models.CharField(blank=False, max_length=50)
-    equipment_type = models.CharField(max_length=50, choices=EQUIPMENT_CHOICES, default=UNCLASSIFIED)
+    weight_class = models.FloatField(blank=False, default=0)
     manufracturer = models.CharField(max_length=50, default=None)
     count = models.IntegerField(default=0)
     
@@ -33,7 +13,7 @@ class Supplier(models.Model):
     supplier_id = models.AutoField(primary_key=True)
     supplier_code = models.CharField(max_length=5, unique=True, blank=False, null=False)
     name = models.CharField(max_length=100)
-    contact_info = models.CharField(max_length=200)
+    contact_info = models.CharField(max_length=200, unique=True)
     address = models.CharField(max_length=200)
     
     

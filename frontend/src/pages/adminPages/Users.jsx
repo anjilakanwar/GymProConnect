@@ -34,21 +34,21 @@ export function Users() {
 
 	return (
 		<>
-			{usersData && (
-				<TableContainer component={Paper}>
-					<Table sx={{ minWidth: 650 }} aria-label="simple table">
-						<TableHead>
-							<TableRow>
-								<TableCell>ID</TableCell>
-								<TableCell align="right">Username</TableCell>
-								<TableCell align="right">First Name</TableCell>
-								<TableCell align="right">Last Name</TableCell>
-								<TableCell align="right">Email</TableCell>
-								<TableCell align="right">Date Joined</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{usersData.map((row) => (
+			<TableContainer component={Paper}>
+				<Table sx={{ minWidth: 650 }} aria-label="simple table">
+					<TableHead>
+						<TableRow>
+							<TableCell>ID</TableCell>
+							<TableCell align="right">Username</TableCell>
+							<TableCell align="right">First Name</TableCell>
+							<TableCell align="right">Last Name</TableCell>
+							<TableCell align="right">Email</TableCell>
+							<TableCell align="right">Date Joined</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{usersData &&
+							usersData.map((row) => (
 								<TableRow
 									key={row.id}
 									sx={{
@@ -74,10 +74,9 @@ export function Users() {
 									</TableCell>
 								</TableRow>
 							))}
-						</TableBody>
-					</Table>
-				</TableContainer>
-			)}
+					</TableBody>
+				</Table>
+			</TableContainer>
 		</>
 	);
 }
