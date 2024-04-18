@@ -11,7 +11,7 @@ from .models import CustomUser
 from .serializers import LoginSerializer, UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):    
+class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     
@@ -26,12 +26,12 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action == "get":
-            return [IsAdminUser(),]
+            return [AllowAny(),]
         
         if self.action == "create":
             return [AllowAny(),]
         
-        return [IsAuthenticated(),]
+        return [AllowAny(),]
     
     
 class CustomAuthToken(ObtainAuthToken):

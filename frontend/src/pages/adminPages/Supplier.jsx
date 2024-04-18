@@ -6,7 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Add, Close, ShoppingCart } from "@mui/icons-material";
+import { Add, Close } from "@mui/icons-material";
 
 import { useAuth } from "../../context/AuthUser";
 import axiosInstance from "../../utils/axiosInstance";
@@ -17,10 +17,7 @@ import {
 	DialogTitle,
 	DialogActions,
 	IconButton,
-	MenuItem,
-	Select,
 	TextField,
-	InputAdornment,
 	FormControl,
 } from "@mui/material";
 
@@ -29,12 +26,14 @@ export function Supplier() {
 	const [suppliersData, setSuppliersData] = useState(null);
 
 	const [showForm, setShowForm] = useState(null);
+	const [isEditing, setIsEditing] = useState(false);
 
 	const [formData, setFormData] = useState({
 		supplier_code: "",
 		name: "",
 		contact_info: "",
 		address: "",
+		email: "",
 	});
 
 	useEffect(() => {
@@ -69,6 +68,46 @@ export function Supplier() {
 			.catch((err) => {
 				console.log(err);
 			});
+	};
+
+	const handleDelete = async (id) => {
+		await axiosInstance(userData.token)
+			.delete(`supplier/${id}/`)
+			.then(() => {
+				window.location.reload(false);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	};
+
+	const handleEdit = async () => {
+		await axiosInstance(userData.token)
+			.put(`supplier/${formData.supplier_id}/`, formData)
+			.then(() => {
+				window.location.reload(false);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	};
+
+	const openEditDialog = (id) => {
+		setFormData(suppliersData.find((e) => e.supplier_id == id));
+		setIsEditing(true);
+		setShowForm(true);
+	};
+
+	const openAddDialog = () => {
+		setFormData({
+			supplier_code: "",
+			name: "",
+			contact_info: "",
+			address: "",
+			email: "",
+		});
+		setIsEditing(false);
+		setShowForm(true);
 	};
 
 	return (
@@ -106,6 +145,7 @@ export function Supplier() {
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.name}
 								fullWidth
 							/>
 							<TextField
@@ -116,6 +156,7 @@ export function Supplier() {
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.supplier_code}
 								fullWidth
 							/>
 							<TextField
@@ -126,6 +167,18 @@ export function Supplier() {
 								type="number"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.contact_info}
+								fullWidth
+							/>
+							<TextField
+								autoFocus
+								margin="dense"
+								id="email"
+								label="Email"
+								type="email"
+								size="small"
+								onChange={onFormDataChange}
+								value={formData.email}
 								fullWidth
 							/>
 
@@ -137,6 +190,7 @@ export function Supplier() {
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.address}
 								fullWidth
 							/>
 
@@ -148,7 +202,12 @@ export function Supplier() {
 									Cancel
 								</Button>
 
-								<Button onClick={handleSubmit} color="primary">
+								<Button
+									onClick={
+										isEditing ? handleEdit : handleSubmit
+									}
+									color="primary"
+								>
 									Submit
 								</Button>
 							</DialogActions>
@@ -163,7 +222,9 @@ export function Supplier() {
 							<TableCell>Supplier Name</TableCell>
 							<TableCell align="right">Supplier Code</TableCell>
 							<TableCell align="right">Contact Info</TableCell>
+							<TableCell align="right">Email</TableCell>
 							<TableCell align="right">Address</TableCell>
+							<TableCell align="center">Operations</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -187,7 +248,27 @@ export function Supplier() {
 										{row.contact_info}
 									</TableCell>
 									<TableCell align="right">
+										{row.email}
+									</TableCell>
+									<TableCell align="right">
 										{row.address}
+									</TableCell>
+									<TableCell align="center">
+										<Button
+											onClick={() =>
+												openEditDialog(row.supplier_id)
+											}
+										>
+											Edit
+										</Button>{" "}
+										|
+										<Button
+											onClick={() =>
+												handleDelete(row.supplier_id)
+											}
+										>
+											Delete
+										</Button>
 									</TableCell>
 								</TableRow>
 							))}
@@ -198,7 +279,7 @@ export function Supplier() {
 				variant="outlined"
 				size="small"
 				startIcon={<Add />}
-				onClick={() => setShowForm(true)}
+				onClick={openAddDialog}
 			>
 				Add Supplier
 			</Button>

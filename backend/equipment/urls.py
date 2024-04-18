@@ -3,7 +3,7 @@ from django.urls import include, path
 
 from rest_framework import routers
 from .views import (
-    EquipmentViewSet, SupplierViewSet, PurchaseLogViewSet,
+    EquipmentViewSet, OrderHistoryViewSet, SupplierViewSet, PurchaseLogViewSet,
     DiscountViewSet, TransactionLogViewSet, SaleViewSet,
     OnlineSaleViewSet, OfflineSalesLogViewSet
 )
@@ -18,5 +18,6 @@ router.register(r'transactionlog', TransactionLogViewSet, basename='transactionl
 router.register(r'sale', SaleViewSet, basename='sale')
 router.register(r'onlinesale', OnlineSaleViewSet, basename='onlinesale')
 router.register(r'offlinesaleslog', OfflineSalesLogViewSet, basename='offlinesaleslog')
+router.register(r'orderhistory', OrderHistoryViewSet, basename='orderhistory')
 
 urlpatterns = router.urls

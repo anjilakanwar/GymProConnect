@@ -23,18 +23,17 @@ import {
 	InputAdornment,
 	FormControl,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
 export function Equipments() {
-	const navigate = useNavigate();
 	const { userData } = useAuth();
 	const [equipmentData, setEquipmentData] = useState(null);
 	const [suppliersData, setSuppliersData] = useState(null);
 
 	const [showOrderForm, setShowOrderForm] = useState(null);
 	const [hasSuppliers, setHasSuppliers] = useState(null);
+	const [isEditing, setIsEditing] = useState(null);
 
-	const [formData, setFormData] = useState({
+	var [formData, setFormData] = useState({
 		name: "",
 		weight_class: "",
 		manufracturer: "",
@@ -80,12 +79,52 @@ export function Equipments() {
 
 		await axiosInstance(userData.token)
 			.post("equipment/", formData)
-			.then((res) => {
+			.then(() => {
 				window.location.reload(false);
 			})
 			.catch((err) => {
 				console.log(err);
 			});
+	};
+
+	const handleDelete = async (id) => {
+		await axiosInstance(userData.token)
+			.delete(`equipment/${id}/`)
+			.then(() => {
+				window.location.reload(false);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	};
+
+	const handleEdit = async () => {
+		await axiosInstance(userData.token)
+			.put(`equipment/${formData.equipment_id}/`, formData)
+			.then(() => {
+				window.location.reload(false);
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	};
+
+	const openEditDialog = (id) => {
+		setFormData(equipmentData.find((e) => e.equipment_id == id));
+		setIsEditing(true);
+		setShowOrderForm(true);
+	};
+
+	const openAddDialog = () => {
+		setFormData({
+			name: "",
+			weight_class: "",
+			manufracturer: "",
+			count: "",
+			supplier: "",
+		});
+		setIsEditing(false);
+		setShowOrderForm(true);
 	};
 
 	return (
@@ -123,6 +162,7 @@ export function Equipments() {
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.name}
 								fullWidth
 							/>
 							<TextField
@@ -133,6 +173,7 @@ export function Equipments() {
 								type="text"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.manufracturer}
 								fullWidth
 							/>
 							<TextField
@@ -150,6 +191,7 @@ export function Equipments() {
 										</InputAdornment>
 									),
 								}}
+								value={formData.weight_class}
 								fullWidth
 							/>
 
@@ -161,48 +203,56 @@ export function Equipments() {
 								type="number"
 								size="small"
 								onChange={onFormDataChange}
+								value={formData.count}
 								fullWidth
 							/>
-							<Select
-								labelId="form-suppliers"
-								size="small"
-								margin="dense"
-								value={
-									hasSuppliers
-										? formData.supplier
-										: "No Suppliers Available"
-								}
-								disabled={hasSuppliers ? false : true}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										supplier: e.target.value,
-									})
-								}
-								className="mt-2"
-								fullWidth
-							>
-								{suppliersData &&
-									suppliersData.map((row) => (
-										<MenuItem
-											key={row.supplier_code}
-											value={row.supplier_code}
-										>
-											{row.name}
-										</MenuItem>
-									))}
-							</Select>
+							{!isEditing && (
+								<Select
+									labelId="form-suppliers"
+									size="small"
+									margin="dense"
+									value={
+										hasSuppliers
+											? formData.supplier
+											: "No Suppliers Available"
+									}
+									disabled={hasSuppliers ? false : true}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											supplier: e.target.value,
+										})
+									}
+									className="mt-2"
+									fullWidth
+								>
+									{suppliersData &&
+										suppliersData.map((row) => (
+											<MenuItem
+												key={row.supplier_id}
+												value={row.supplier_id}
+											>
+												{row.name}
+											</MenuItem>
+										))}
+								</Select>
+							)}
 
 							<DialogActions>
 								<Button
-									onClick={() => setShowOrderForm(false)}
+									onClick={() => {
+										setIsEditing(false);
+										setShowOrderForm(false);
+									}}
 									color="secondary"
 								>
 									Cancel
 								</Button>
 
 								<Button
-									onClick={handleSubmit}
+									onClick={
+										isEditing ? handleEdit : handleSubmit
+									}
 									color="primary"
 									disabled={hasSuppliers ? false : true}
 								>
@@ -221,6 +271,7 @@ export function Equipments() {
 							<TableCell align="right">Weight Class</TableCell>
 							<TableCell align="right">Manufracturer</TableCell>
 							<TableCell align="right">Count</TableCell>
+							<TableCell align="center">Operation</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -246,6 +297,23 @@ export function Equipments() {
 									<TableCell align="right">
 										{row.count}
 									</TableCell>
+									<TableCell align="center">
+										<Button
+											onClick={() =>
+												openEditDialog(row.equipment_id)
+											}
+										>
+											Edit
+										</Button>{" "}
+										|
+										<Button
+											onClick={() =>
+												handleDelete(row.equipment_id)
+											}
+										>
+											Delete
+										</Button>
+									</TableCell>
 								</TableRow>
 							))}
 					</TableBody>
@@ -255,7 +323,7 @@ export function Equipments() {
 				variant="outlined"
 				size="small"
 				startIcon={<ShoppingCart />}
-				onClick={() => setShowOrderForm(true)}
+				onClick={openAddDialog}
 			>
 				Order Equipment
 			</Button>

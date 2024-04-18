@@ -10,6 +10,7 @@ import { Equipments } from "./pages/adminPages/Equipment";
 import { PurchaseLog } from "./pages/adminPages/PurchaseLog";
 import { Users } from "./pages/adminPages/Users";
 import { Supplier } from "./pages/adminPages/Supplier";
+import { OrderHistory } from "./pages/adminPages/OrderHistory";
 
 export const App = () => {
 	useEffect(() => {});
@@ -24,6 +25,7 @@ export const App = () => {
 					<Route path="equipment" element={<Equipments />} />
 					<Route path="supplier" element={<Supplier />} />
 					<Route path="transactions" element={<PurchaseLog />} />
+					<Route path="order-history" element={<OrderHistory />} />
 					<Route path="users" element={<Users />} />
 				</Route>
 				<Route path="*" element={<Error />} />

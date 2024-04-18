@@ -14,6 +14,7 @@ class Supplier(models.Model):
     supplier_code = models.CharField(max_length=5, unique=True, blank=False, null=False)
     name = models.CharField(max_length=100)
     contact_info = models.CharField(max_length=200, unique=True)
+    email = models.EmailField()
     address = models.CharField(max_length=200)
     
     
@@ -29,6 +30,14 @@ class TransactionLog(models.Model):
     transaction_date = models.DateTimeField(auto_now=True)
     discount = models.IntegerField()
     total = models.BigIntegerField(blank=False)
+    
+    
+class OrderHistory(models.Model):
+    order_id = models.AutoField(primary_key=True)
+    order_date = models.DateField(auto_now=True)
+    item_name = models.CharField(max_length=30)
+    supplier = models.ForeignKey(Supplier, on_delete=models.DO_NOTHING)
+    count = models.IntegerField()
     
     
 class PurchaseLog(models.Model):

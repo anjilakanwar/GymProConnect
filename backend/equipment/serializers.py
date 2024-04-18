@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Equipment, Supplier, PurchaseLog, Discount, TransactionLog, Sale, OnlineSale, OfflineSalesLog
+from .models import Equipment, OrderHistory, Supplier, PurchaseLog, Discount, TransactionLog, Sale, OnlineSale, OfflineSalesLog
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
@@ -47,4 +47,10 @@ class OnlineSaleSerializer(serializers.ModelSerializer):
 class OfflineSalesLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfflineSalesLog
+        fields = '__all__'
+        
+        
+class OrderHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderHistory
         fields = '__all__'

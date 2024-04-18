@@ -1,8 +1,9 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 
-from .models import Equipment, Supplier, PurchaseLog, Discount, TransactionLog, Sale, OnlineSale, OfflineSalesLog
+from .models import Equipment, OrderHistory, Supplier, PurchaseLog, Discount, TransactionLog, Sale, OnlineSale, OfflineSalesLog
 from .serializers import (
-    EquipmentSerializer, SupplierSerializer, PurchaseLogSerializer,
+    EquipmentSerializer, OrderHistorySerializer, SupplierSerializer, PurchaseLogSerializer,
     DiscountSerializer, TransactionLogSerializer, SaleSerializer,
     OnlineSaleSerializer, OfflineSalesLogSerializer
 )
@@ -11,6 +12,17 @@ from .serializers import (
 class EquipmentViewSet(viewsets.ModelViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
+    
+    def create(self, request, *args, **kwargs):
+        request.data['item_name'] = request.data['name']
+        
+        order_history = OrderHistorySerializer(data=request.data)
+        
+        if order_history.is_valid():
+            order_history.save()
+            return super().create(request, *args, **kwargs)
+        
+        return Response({"error" : "Failed to Set Order"}, status=403)
     
 
 class SupplierViewSet(viewsets.ModelViewSet):
@@ -46,3 +58,8 @@ class OnlineSaleViewSet(viewsets.ModelViewSet):
 class OfflineSalesLogViewSet(viewsets.ModelViewSet):
     queryset = OfflineSalesLog.objects.all()
     serializer_class = OfflineSalesLogSerializer
+    
+    
+class OrderHistoryViewSet(viewsets.ModelViewSet):
+    queryset = OrderHistory.objects.all()
+    serializer_class = OrderHistorySerializer
