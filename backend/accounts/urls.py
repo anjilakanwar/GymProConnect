@@ -2,14 +2,15 @@ from django.urls import path
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 
-from .views import UserViewSet, LogoutView, CustomAuthToken
+from . import views
 
 urlpatterns = [
-    path("login/", CustomAuthToken.as_view(), name="login"),
-    path("logout/", LogoutView.as_view(), name="logout"),
+    path("login/", views.CustomAuthToken.as_view(), name="login"),
+    path("logout/", views.LogoutView.as_view(), name="logout"),
+    path("user_role/", views.getUserRole, name="user_role")
 ]
 
 router = routers.DefaultRouter()
 
-router.register(r'users', UserViewSet)
+router.register(r'users', views.UserViewSet)
 urlpatterns += router.urls

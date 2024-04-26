@@ -36,6 +36,20 @@ class UserSerializer(serializers.ModelSerializer):
         
         return user
     
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['full_name'] = f"{instance.first_name} {instance.last_name}"
+        
+        if data['role'] == 's_manager':
+            data['role'] = 'Sales Manager'
+        elif data['role'] == 'manager':
+            data['role'] = 'Manager'
+        elif data['role'] == 'receptionist':
+            data['role'] = 'Receptionist'
+            
+
+        return data
+    
 
 class LoginSerializer(serializers.Serializer):
     model = CustomUser

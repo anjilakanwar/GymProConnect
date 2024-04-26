@@ -33,6 +33,7 @@ export function Users() {
 		phone_number: "",
 		dob: "",
 		address: "",
+		role: "",
 		is_staff: true,
 	});
 
@@ -46,15 +47,15 @@ export function Users() {
 	useEffect(() => {
 		document.title = "Users";
 
-		const fetchEquipmentData = async () => {
+		const fetchData = async () => {
 			await axiosInstance(userData.token)
 				.get("accounts/users/")
 				.then((res) => {
-					setUsersData(res.data.results);
+					setUsersData(res.data);
 				});
 		};
 
-		fetchEquipmentData();
+		fetchData();
 	}, [userData]);
 
 	const handleSubmit = async (e) => {
@@ -101,6 +102,7 @@ export function Users() {
 			phone_number: "",
 			dob: "",
 			address: "",
+			role: "",
 			is_staff: true,
 		});
 		setIsEditing(false);
@@ -293,6 +295,40 @@ export function Users() {
 									/>
 								</div>
 							</div>
+							<div className="flex flex-wrap -mx-3 mb-2">
+								<div className="w-full px-3 mb-6 md:mb-0">
+									<label
+										className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+										htmlFor="role"
+									>
+										Role
+									</label>
+									<select
+										className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 
+										rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+										id="role"
+										name="role"
+										value={formData.address}
+										onChange={onFormDataChange}
+									>
+										<option
+											id="s_manager"
+											value="s_manager"
+										>
+											Sales Manager
+										</option>
+										<option
+											id="receptionist"
+											value="receptionist"
+										>
+											Receptionist
+										</option>
+										<option id="manager" value="manager">
+											Manager
+										</option>
+									</select>
+								</div>
+							</div>
 							<button
 								className="shadow bg-blue-600 hover:bg-blue-500 focus:shadow-outline focus:outline-none 
 								text-white font-bold py-2 px-4 rounded"
@@ -309,11 +345,9 @@ export function Users() {
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
 					<TableHead>
 						<TableRow>
-							<TableCell align="center">Username</TableCell>
-							<TableCell align="center">First Name</TableCell>
-							<TableCell align="center">Last Name</TableCell>
+							<TableCell align="center">Full Name</TableCell>
 							<TableCell align="center">Email</TableCell>
-							<TableCell align="center">Date Joined</TableCell>
+							<TableCell align="center">Role</TableCell>
 							<TableCell align="center">Operation</TableCell>
 						</TableRow>
 					</TableHead>
@@ -328,20 +362,14 @@ export function Users() {
 										},
 									}}
 								>
-									<TableCell component="th" scope="row">
-										{row.username}
-									</TableCell>
 									<TableCell align="center">
-										{row.first_name}
-									</TableCell>
-									<TableCell align="center">
-										{row.last_name}
+										{row.full_name}
 									</TableCell>
 									<TableCell align="center">
 										{row.email}
 									</TableCell>
 									<TableCell align="center">
-										{row.date_joined}
+										{row.role}
 									</TableCell>
 									<TableCell align="center">
 										{userData.user_id == row.id ? null : (

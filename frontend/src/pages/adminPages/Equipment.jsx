@@ -271,7 +271,9 @@ export function Equipments() {
 							<TableCell align="right">Weight Class</TableCell>
 							<TableCell align="right">Manufracturer</TableCell>
 							<TableCell align="right">Count</TableCell>
-							<TableCell align="center">Operation</TableCell>
+							{userData.is_admin && (
+								<TableCell align="center">Operation</TableCell>
+							)}
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -297,36 +299,44 @@ export function Equipments() {
 									<TableCell align="right">
 										{row.count}
 									</TableCell>
-									<TableCell align="center">
-										<Button
-											onClick={() =>
-												openEditDialog(row.equipment_id)
-											}
-										>
-											Edit
-										</Button>{" "}
-										|
-										<Button
-											onClick={() =>
-												handleDelete(row.equipment_id)
-											}
-										>
-											Delete
-										</Button>
-									</TableCell>
+									{userData.is_admin && (
+										<TableCell align="center">
+											<Button
+												onClick={() =>
+													openEditDialog(
+														row.equipment_id
+													)
+												}
+											>
+												Edit
+											</Button>{" "}
+											|
+											<Button
+												onClick={() =>
+													handleDelete(
+														row.equipment_id
+													)
+												}
+											>
+												Delete
+											</Button>
+										</TableCell>
+									)}
 								</TableRow>
 							))}
 					</TableBody>
 				</Table>
 			</TableContainer>
-			<Button
-				variant="outlined"
-				size="small"
-				startIcon={<ShoppingCart />}
-				onClick={openAddDialog}
-			>
-				Order Equipment
-			</Button>
+			{userData.is_admin && (
+				<Button
+					variant="outlined"
+					size="small"
+					startIcon={<ShoppingCart />}
+					onClick={openAddDialog}
+				>
+					Order Equipment
+				</Button>
+			)}
 		</>
 	);
 }
