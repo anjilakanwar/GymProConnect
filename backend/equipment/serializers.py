@@ -1,11 +1,24 @@
+from pyexpat import model
 from rest_framework import serializers
-from .models import Equipment, OrderHistory, Supplier, PurchaseLog, Discount, TransactionLog, Sale, OnlineSale, OfflineSalesLog
+from .models import Equipment, EquipmentPictures, OrderHistory, Supplier, PurchaseLog, Discount, TransactionLog, OfflineSalesLog
 
+
+class EquipmentPictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EquipmentPictures
+        fields = ['equipment_img']
 
 class EquipmentSerializer(serializers.ModelSerializer):
+    pictures = serializers.SerializerMethodField()
+    
     class Meta:
         model = Equipment
         fields = '__all__'
+        
+    def get_pictures(self, obj):
+        request = self.context.get('request')
+        pictures = EquipmentPictures.objects.filter(equipment=obj)
+        return [request.build_absolute_uri(picture.equipment_img.url) for picture in pictures if picture.equipment_img]
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -29,18 +42,6 @@ class DiscountSerializer(serializers.ModelSerializer):
 class TransactionLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionLog
-        fields = '__all__'
-
-
-class SaleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sale
-        fields = '__all__'
-
-
-class OnlineSaleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OnlineSale
         fields = '__all__'
 
 

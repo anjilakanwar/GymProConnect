@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.http import HttpRequest
 from django.views import decorators
 from django.core import serializers
 
@@ -23,6 +24,17 @@ def getUserRole(request):
     
     return Response({"role" : user.role}, status=200)
 
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+def getUserDetail(request: HttpRequest):
+    if request.method == 'POST':
+        token = str(request.headers['Authorization']).split(" ")[1]
+        user = Token.objects.get(key=token).user
+        data = UserSerializer(user).data
+        data['token'] = token
+        
+        return Response(data, status=200)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
@@ -43,35 +55,23 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
     
-    def get_permissions(self):
-        if self.action == "get":
-            return [AllowAny(),]
-        
-        if self.action == "create":
-            return [AllowAny(),]
-        
-        return [AllowAny(),]
-    
     
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
+        
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+        data = UserSerializer(user).data
+        data['token'] = token.key
         
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'username': user.username,
-            'email': user.email,
-            'is_admin': user.is_superuser,
-            'full_name': f"{user.first_name} {user.last_name}",
-        })
+        return Response(data, status=200)
     
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
     
     def post(self, request):    
         request.user.auth_token.delete()

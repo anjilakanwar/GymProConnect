@@ -15,5 +15,10 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, null=False, )
     
+    profile_picture = models.ImageField(upload_to="images/profile_picture/", default="images/profile_picture/fallback.png")
+    
     def __str__(self):
         return self.username
+    
+    def get_full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
