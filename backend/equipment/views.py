@@ -1,22 +1,28 @@
 import json
+import requests
+
 from django.conf import settings
 from django.http import HttpRequest
-
 from django.shortcuts import redirect
-import requests
+from django.core.cache import cache
+from django.core.mail import send_mail
+
 from rest_framework import viewsets, status, views
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import authentication_classes
+from rest_framework.decorators import authentication_classes, api_view, action
 
 import equipment
 from equipment.utils import generate_code, generate_random_string
+from utils import extract_token
 
 from .models import (
     Equipment,
     EquipmentPictures,
     OrderHistory,
+    Sales,
     Supplier,
     PurchaseLog,
     Discount,
@@ -26,31 +32,96 @@ from .models import (
 from .serializers import (
     EquipmentSerializer,
     OrderHistorySerializer,
+    SalesSerializer,
     SupplierSerializer,
     PurchaseLogSerializer,
     DiscountSerializer,
     TransactionLogSerializer,
     OfflineSalesLogSerializer,
 )
+    
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+def purchase_history(request):
+    if request.method == "GET":
+        token = extract_token(request.headers["Authorization"])
+        user = Token.objects.get(key=token).user
+        sales = Sales.objects.filter(user=user.id)
+        
+        serialized = SalesSerializer(sales, many=True, context={'request': request})
+        
+        return Response(data=serialized.data, status=status.HTTP_200_OK)
 
 
 def verify_payment(request):
     if request.method == "GET":
         data = request.GET
 
-        if data["status"] == "Completed":
-            transcation = TransactionLog(
+        if data["status"] == "Completed": 
+            cache_data = cache.get(data["pidx"])
+
+            user = Token.objects.get(key=cache_data["token"]).user
+
+            
+
+            send_mail(
+                "Subscription",
+                f"Your billing log.\n \
+                Transaction ID : {data['transaction_id']}\n \
+                Transaction Name : {data['purchase_order_name']}\n \
+                Total Amount : {data['total_amount']}",
+                settings.EMAIL_HOST_USER,
+                [user.email],
+            )
+
+            info = cache_data["data"]
+            
+            transaction = TransactionLog(
                 discount=0,
-                total=data["total_amount"],
+                total=0,
                 transaction_ref=data["transaction_id"],
                 payment_method="Khalti",
             )
-            transcation.save()
+            transaction.save()
+            
+            total_amount = 0
+            for i in info[:-1]:
+                equipment = Equipment.objects.get(pk=i["id"])
+                sale = Sales(
+                    transaction=transaction,
+                    equipment=equipment,
+                    quantity=i["qty"],
+                    price_per=i["price_per"],
+                    user=user,
+                )
+                equipment.count -= i["qty"]
+                equipment.save(update_fields=["count"])
+                sale.save()
+                
+                total_amount += (i["qty"] * i["price_per"])
+            
+            transaction.total = total_amount
+            transaction.save()
 
-        return redirect("http://localhost:3030/")
+            cache.delete(data["pidx"])
+
+        return redirect(f"http://localhost:3030/purchase-success/{transaction.transaction_id}")
+
+
+def validate_equipemnt(data):
+    for i in data[:-1]:
+        print(i)
+        model = Equipment.objects.get(pk=i["id"])
+
+        if model.count < i["qty"]:
+            return False
+
+    return True
 
 
 class PaymentAPIView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+
     def post(self, request):
         if request.method == "POST":
             url = "https://a.khalti.com/api/v2/epayment/initiate/"
@@ -58,13 +129,18 @@ class PaymentAPIView(views.APIView):
             data = json.loads(request.body)
             orderNameID = generate_random_string()
 
+            if not validate_equipemnt(data):
+                return Response(
+                    "Order Quantity cannot be greater than Stock Quantity", 500
+                )
+
             product_details = []
 
             for item in data[:-1]:
                 formatted_item = {
                     "identity": item["id"],
                     "name": item["name"],
-                    "total_price": item["qty"] * item["price_per"],
+                    "total_price": (item["qty"] * item["price_per"]) * 100 ,
                     "quantity": item["qty"],
                     "unit_price": item["price_per"],
                 }
@@ -74,7 +150,7 @@ class PaymentAPIView(views.APIView):
                 {
                     "return_url": f"{settings.HOSTNAME}verify-payment//",
                     "website_url": settings.HOSTNAME,
-                    "amount": data[-1],
+                    "amount": 100000,
                     "purchase_order_id": orderNameID,
                     "purchase_order_name": orderNameID,
                     "customer_info": {
@@ -94,6 +170,12 @@ class PaymentAPIView(views.APIView):
             response = requests.request("POST", url, headers=headers, data=payload)
 
             if response.status_code == 200:
+                cache_data = {
+                    "token": Token.objects.get(user=request.user),
+                    "data": data,
+                }
+                cache.set(response.json()["pidx"], cache_data, timeout=300)
+
                 return Response(response.json(), 200)
             else:
                 print(response.text)
@@ -161,6 +243,11 @@ class TransactionLogViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionLogSerializer
 
 
+class SalesViewSet(viewsets.ModelViewSet):
+    queryset = Sales.objects.all()
+    serializer_class = SalesSerializer
+
+
 class OfflineSalesLogViewSet(viewsets.ModelViewSet):
     queryset = OfflineSalesLog.objects.all()
     serializer_class = OfflineSalesLogSerializer
@@ -170,3 +257,41 @@ class OrderHistoryViewSet(viewsets.ModelViewSet):
     queryset = OrderHistory.objects.all()
     serializer_class = OrderHistorySerializer
     permission_classes = [IsAdminUser]
+    
+    def create(self, request, *args, **kwargs):
+        data = super().create(request, *args, **kwargs)
+        
+        supplier = Supplier.objects.filter(name=request.data['supplier_name']).first()
+        
+        send_mail(
+                "Order Request",
+                f"Hello, I would like to make a request for below equipment {request.data['item_name']} x{request.data['count']} Manufractured by {request.data['manufracturer']}\n\nThank You,\nRegards,\nGym Pro Connect",
+                settings.EMAIL_HOST_USER,
+                [supplier.email],
+            )
+        
+        return data
+    
+    @action(detail=True, methods=['patch'], url_path='order-status')
+    def set_order_delivery(self, request, pk):
+        order = self.get_object()
+        order.status = "Delivered"
+        try:
+            equipment = Equipment.objects.filter(name=order.item_name, manufracturer=order.item_manufracturer)
+            
+            if equipment.exists():
+                equipment = equipment.first()
+                equipment.count += order.count
+            else:
+                equipment = Equipment(
+                    name=order.item_name,
+                    manufracturer=order.item_manufracturer,
+                    count=order.count
+                )
+                
+            equipment.save()
+            order.save()
+            
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

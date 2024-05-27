@@ -1,4 +1,8 @@
-from rest_framework import serializers
+from django.db.utils import IntegrityError
+
+from rest_framework import serializers, status
+from rest_framework.response import Response 
+
 from .models import CustomUser
 
 def validate_phoneNo(value):
@@ -13,8 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'phone_number': {'required': True},
-            'dob' : {'required': True},
-            'address' : {'required': True},
             'first_name': {'required': True},
             'last_name': {'required': True},
             'password': {'write_only': True}
@@ -35,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+            
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -46,7 +49,8 @@ class UserSerializer(serializers.ModelSerializer):
             data['role'] = 'Manager'
         elif data['role'] == 'receptionist':
             data['role'] = 'Receptionist'
-            
+        elif data['role'] == 'client':
+            data['role'] = 'Client'
 
         return data
     
